@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+# Return a message if no arguments are present
+if [ -z "$1" ]; then
+    echo "No argument supplied. You need to include something like gpc npm run dev."
+    exit
+fi
+
+# Handle npm commands
+if [ "$1" == "npm" ]; then
+    docker run --rm -it -v $(pwd):/usr/src/app -w /usr/src/app node:current-alpine "$@"
+fi
+
+# Handle mysql databases
+if [ "$1" == "mysql" ]; then
+    if [ -z "$2" ]; then
+        echo "You need to specify a database name and password. Like gpc mysql laravel secret."
+        exit
+    fi
+    if [ -z "$3" ]; then
+        echo "You need to specify a database name and password. Like gpc mysql laravel secret."
+        exit
+    fi
+    if [ -z "$4" ]; then
+        docker run -d -e MYSQL_ROOT_PASSWORD="$3" -e MYSQL_USER="$2" -e MYSQL_DATABASE="$2" -e MYSQL_PASSWORD="$3" -p 3306:3306 mariadb:latest
+    else
+        docker run -d -e MYSQL_ROOT_PASSWORD="$3" -e MYSQL_USER="$2" -e MYSQL_DATABASE="$2" -e MYSQL_PASSWORD="$3" -p "$4":3306 mariadb:latest
+    fi
+fi
+
+# Handle composer commands
+if [ "$1" == "composer" ]; then
+    docker run --rm -it -v $(pwd):/app composer "$@"
+fi
